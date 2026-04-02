@@ -1,11 +1,61 @@
 import streamlit as st
 import cv2
 import numpy as np
+import json
+import os
+import hashlib
+USER_FILE = "users.json"
+
+def load_users():
+    if not os.path.exists(USER_FILE):
+        return {}
+    with open(USER_FILE, "r") as f:
+        return json.load(f)
+
+def save_users(users):
+    with open(USER_FILE, "w") as f:
+        json.dump(users, f)
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+users = load_users()
 
 st.set_page_config(layout="wide")
 
 if "filter" not in st.session_state:
     st.session_state.filter = "Smooth"
+
+# ===== LOGIN UI =====
+if st.session_state.user is None:
+    st.markdown("## ✨ Smoothify Login")
+
+    option = st.radio("", ["Login", "Signup"])
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if option == "Signup":
+        if st.button("Create Account"):
+            if username in users:
+                st.error("User already exists")
+            else:
+                users[username] = hash_password(password)
+                save_users(users)
+                st.success("Account created! Please login.")
+
+    else:
+        if st.button("Login"):
+            if username in users and users[username] == hash_password(password):
+                st.session_state.user = username
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+
+    st.stop()
 
 # ---------- UI ----------
 st.markdown("""
@@ -18,6 +68,7 @@ st.markdown("""
     font-family: 'Fredoka', sans-serif;
 }
 
+            
 /* TITLE */
 .title {
     text-align: center;
