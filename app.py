@@ -182,3 +182,4 @@ with right:
         st.markdown('<div class="panel">', unsafe_allow_html=True)
         st.markdown("### Preview\nUpload an image to see results ✨")
         st.markdown('</div>', unsafe_allow_html=True)
+
